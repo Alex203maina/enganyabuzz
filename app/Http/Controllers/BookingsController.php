@@ -22,21 +22,25 @@ class BookingsController extends Controller
             })
             ->get();
     
+        // Initialize SMS content
+        $smsContent = ""; 
+    
         // Calculate balance for each booking
         foreach ($bookings as $booking) {
-            // Ensure the trip relationship is loaded
             if ($booking->trip) {
-                $tripPricing = $booking->trip->pricing; // Get trip pricing
-                $booking->balance = $tripPricing - $booking->amount_paid; // Calculate balance
+                $tripPricing = $booking->trip->pricing;
+                $booking->balance = $tripPricing - $booking->amount_paid;
             } else {
-                $booking->balance = null; // Handle case where trip is not found
+                $booking->balance = null;
             }
         }
     
-        return view('admin.bookings', compact('bookings', 'trips'));
+        $bookingId = null; // Default or set it to a specific value if needed
+    
+        // Return the view with bookings, trips, SMS content, and optional booking ID
+        return view('admin.bookings', compact('bookings', 'trips', 'smsContent', 'bookingId'));
     }
-     
- 
+    
     public function download(Request $request)
     {
         $tripId = $request->input('trip_id');
@@ -92,7 +96,7 @@ class BookingsController extends Controller
 // In your controller or model where you handle booking status updates:
 private function updateBookingStatus($booking, $paymentCode, $amountPaid)
 {
-    $trip = $booking->trip; // Assuming you have a relation to get trip details
+    $trip = $booking->trip; 
 
     // Initialize status as 'Pending'
     $status = 'Pending';
@@ -161,32 +165,43 @@ public function showBookingForm($id)
 
     return view('main.booking-form', compact('trip', 'pickupStations'));
 }
-public function sendBulkSms(Request $request)
+public function showSmsForm($id)
 {
-    // Fetch all bookings
-    $bookings = Booking::all();
+    // Fetch booking details
+    $booking = Booking::find($id);
 
-    foreach ($bookings as $booking) {
-        $trip = $booking->trip;
-        $amountPaid = $booking->amount_paid;
-        $requiredAmount = $trip->pricing;
+    if ($booking) {
+        $smsContent = '';
 
-        // Determine the message based on payment status
-        if ($booking->payment_status === 'Complete') {
-            $message = "Dear {$booking->full_name}, your payment for the trip on {$trip->date} is complete. Thank you!";
-        } elseif ($booking->payment_status === 'Incomplete') {
-            $balance = $requiredAmount - $amountPaid;
-            $message = "Dear {$booking->full_name}, you have an outstanding balance of $balance for your trip on {$trip->date}. Please pay by {$trip->date}.";
-        } else {
-            $message = "Dear {$booking->full_name}, your booking for the trip on {$trip->date} is pending. Please complete your payment of $requiredAmount by {$trip->date}.";
+        // Generate default SMS content if needed
+        if (empty($smsContent)) {
+            $trip = $booking->trip;
+            $balance = $booking->balance;
+            $requiredAmount = $booking->required_amount;
+
+            switch ($booking->payment_status) {
+                case 'complete':
+                    $smsContent = "Dear {$booking->full_name}, your payment for the trip on {$trip->date} is complete. Thank you!";
+                    break;
+                case 'outstanding':
+                    $smsContent = "Dear {$booking->full_name}, you have an outstanding balance of $balance for your trip on {$trip->date}. Please pay by {$trip->date}.";
+                    break;
+                case 'pending':
+                default:
+                    $smsContent = "Dear {$booking->full_name}, your booking for the trip on {$trip->date} is pending. Please complete your payment of $requiredAmount by {$trip->date}.";
+                    break;
+            }
         }
 
-        // Send the SMS
-        SmsService::sendSms($booking->phone, $message);
+        return view('admin.sms_form', [
+            'bookingId' => $id,
+            'smsContent' => $smsContent,
+        ]);
+    } else {
+        return redirect()->back()->with('status', 'Booking not found.')->with('status_type', 'danger');
     }
-
-    return redirect()->back()->with('success', 'Bulk SMS sent successfully!');
 }
+
 public function sendSms(Request $request)
 {
     // Fetch booking ID and SMS content from the request
@@ -197,7 +212,25 @@ public function sendSms(Request $request)
     $booking = Booking::find($bookingId);
 
     if ($booking) {
-        // Replace these with your actual API credentials
+        if (empty($smsContent)) {
+            $trip = $booking->trip; // Fetch the associated trip details
+            $balance = $booking->balance; // Example variable for outstanding balance
+            $requiredAmount = $booking->required_amount; // Example variable for required amount
+
+            switch ($booking->payment_status) {
+                case 'complete':
+                    $smsContent = "Dear {$booking->full_name}, your payment for the trip on {$trip->date} is complete. Thank you!";
+                    break;
+                case 'outstanding':
+                    $smsContent = "Dear {$booking->full_name}, you have an outstanding balance of $balance for your trip on {$trip->date}. Please pay by {$trip->date}.";
+                    break;
+                case 'pending':
+                default:
+                    $smsContent = "Dear {$booking->full_name}, your booking for the trip on {$trip->date} is pending. Please complete your payment of $requiredAmount by {$trip->date}.";
+                    break;
+            }
+        }
+
         $api_key = "WkdYR1FCNlo6dGFrcnA5a2w=";
         $email = "alex203maina@gmail.com";
         $sender_id = "UMS_SMS";
@@ -267,7 +300,8 @@ public function filterBookings(Request $request)
             return $query->where('trip_id', $tripId);
         })
         ->get();
-    
+        $smsContent = '';
+
     // Fetch all trips for the view
     $trips = Trip::all();
 
@@ -277,10 +311,11 @@ public function filterBookings(Request $request)
             $tripPricing = $booking->trip->pricing;
             $booking->balance = $tripPricing - $booking->amount_paid;
         } else {
-            $booking->balance = null; // Handle missing trip data
+            $booking->balance = null; 
         }
     }
+    $bookingId = null; // Default or set it to a specific value if needed
 
-    return view('admin.bookings', compact('bookings', 'trips'));
+    return view('admin.bookings', compact('bookings', 'trips','smsContent','bookingId'));
 }
 }

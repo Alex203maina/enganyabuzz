@@ -163,16 +163,17 @@
         <h2 class="text-xl font-semibold mb-4">Send SMS</h2>
         <form id="smsForm" method="POST" action="{{ route('admin.send.sms') }}">
             @csrf
-            <input type="hidden" name="booking_id" id="sms_booking_id">
+            <input type="hidden" name="booking_id" id="sms_booking_id" value="{{ $bookingId }}">
             <div class="mb-4">
                 <label for="sms_content" class="block text-gray-700 mb-2">Message:</label>
-                <textarea name="sms_content" id="sms_content" class="border border-gray-300 rounded-md p-2 w-full" required></textarea>
+                <textarea name="sms_content" id="sms_content" class="border border-gray-300 rounded-md p-2 w-full" required>{{ $smsContent }}</textarea>
             </div>
             <div class="flex justify-end space-x-2">
                 <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200">Send</button>
                 <button type="button" onclick="closeSmsModal()" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200">Cancel</button>
             </div>
         </form>
+
     </div>
 </div>
 

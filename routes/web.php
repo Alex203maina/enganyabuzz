@@ -43,6 +43,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/admin/vehicles/create', [VehiclesController::class, 'create'])->name('admin.vehicles.create');
     Route::post('/send-sms-bulk', [BookingsController::class, 'sendBulkSms'])->name('send.sms.bulk');
     Route::post('/send-sms', [BookingsController::class, 'sendSms'])->name('admin.send.sms');
+    Route::get('/sms-form/{id}', [SmsController::class, 'showSmsForm'])->name('admin.sms.form');
     Route::post('/admin/bookings/confirm', [BookingsController::class, 'confirmBooking'])->name('bookings.confirm');
     Route::post('/admin/confirm-booking', [BookingsController::class, 'confirmBooking'])->name('admin.confirm.booking');
     Route::post('/admin/bookings/confirm', [BookingsController::class, 'confirmBooking'])->name('bookings.confirm');

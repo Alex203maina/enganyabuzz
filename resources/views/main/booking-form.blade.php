@@ -11,8 +11,8 @@
             if (successAlert) {
                 setTimeout(function() {
                     var bsAlert = new bootstrap.Alert(successAlert);
-                    bsAlert.close(); // Programmatically close the alert
-                }, 3000); // 3 seconds
+                    bsAlert.close(); 
+                }, 3000); 
             }
         });
     </script>
@@ -339,60 +339,82 @@
             <div class="col-md-4 w-64">
                 <div class="passenger-details">
                     <h4>Passenger Details</h4>
-                    <form action="{{ route('bookings.store') }}" method="POST">
-                    @csrf
-                      <input type="hidden" name="trip_id" value="{{ $trip->id }}">
-                      <div class="row">
-                          <div class="col-md-6 col-sm-12 form-group">
-                              <label for="full_name">Full Name:</label>
-                              <input type="text" class="form-control" id="full_name" name="full_name" required>
-                          </div>
-                          <div class="col-md-6 col-sm-12 form-group">
-                              <label for="telephone">Telephone:</label>
-                              <input type="tel" class="form-control" id="telephone" name="telephone" required>
-                          </div>
-                      </div>
-                      <div class="row">
-                          <div class="col-md-6 col-sm-12 form-group">
-                              <label for="id_number">ID/Passport:</label>
-                              <input type="text" class="form-control" id="id_number" name="id_number" required>
-                          </div>
-                          <div class="col-md-6 col-sm-12 form-group">
-                              <label for="nationality">Nationality:</label>
-                              <input type="text" class="form-control" id="nationality" name="nationality" required>
-                          </div>
-                          <div class="col-md-6 col-sm-12 form-group">
-                              <label for="payment_code">Payment Code:</label>
-                              <input type="text" class="form-control" id="payment_code" name="payment_code" required>
-                          </div>
-                          <div class="col-md-6 col-sm-12 form-group">
-                              <label for="location">Location:</label>
-                              <input type="text" class="form-control" id="location" name="location" required>
-                          </div>
-                      </div>
-                      <div class="row">
-                          <div class="col-md-6 col-sm-12 form-group">
-                              <label for="gender">Gender:</label>
-                              <select class="form-control" id="gender" name="gender" required>
-                                  <option value="" disabled selected>Select Gender</option>
-                                  <option value="male">Male</option>
-                                  <option value="female">Female</option>
-                                  <option value="other">Other</option>
-                              </select>
-                          </div>
-                          <div class="col-md-6 col-sm-12 form-group">
-                              <label for="pickup_station">Choose Pickup Station:</label>
-                              <select class="form-control" id="pickup_station" name="pickup_station" required>
-                                  <option value="" disabled selected>Select Pickup Station</option>
-                                  @foreach($pickupStations as $station)
-                                      <option value="{{ $station }}">{{ $station }}</option>
-                                  @endforeach
-                              </select>
-                          </div>
-                      </div>
-                      
-                      <button type="submit" class="btn btn-custom btn-block">Book Now</button>
-                  </form>
+                    <form id="bookingForm" action="{{ route('bookings.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="trip_id" value="{{ $trip->id }}">
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12 form-group">
+                                <label for="full_name">Full Name:</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" required>
+                            </div>
+                            <div class="col-md-6 col-sm-12 form-group">
+                                <label for="telephone">Telephone:</label>
+                                <input type="tel" class="form-control" id="telephone" name="telephone" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12 form-group">
+                                <label for="id_number">ID/Passport:</label>
+                                <input type="text" class="form-control" id="id_number" name="id_number" required>
+                            </div>
+                            <div class="col-md-6 col-sm-12 form-group">
+                                <label for="nationality">Nationality:</label>
+                                <input type="text" class="form-control" id="nationality" name="nationality" required>
+                            </div>
+                            <div class="col-md-6 col-sm-12 form-group">
+                                <label for="payment_code">Payment Code:</label>
+                                <input type="text" class="form-control" id="payment_code" name="payment_code" required>
+                            </div>
+                            <div class="col-md-6 col-sm-12 form-group">
+                                <label for="location">Location:</label>
+                                <input type="text" class="form-control" id="location" name="location" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12 form-group">
+                                <label for="gender">Gender:</label>
+                                <select class="form-control" id="gender" name="gender" required>
+                                    <option value="" disabled selected>Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-sm-12 form-group">
+                                <label for="pickup_station">Choose Pickup Station:</label>
+                                <select class="form-control" id="pickup_station" name="pickup_station" required>
+                                    <option value="" disabled selected>Select Pickup Station</option>
+                                    @foreach($pickupStations as $station)
+                                        <option value="{{ $station }}">{{ $station }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="submitBtn" class="btn btn-custom btn-block">Book Now</button>
+                    </form>
+
+                    <div id="message"></div> <!-- Place to show success or error messages -->
+
+                    <!-- Modal for success message (optional) -->
+                    <div class="modal fade" id="showmsg" tabindex="-1" role="dialog" aria-labelledby="showmsgLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="showmsgLabel">Booking Confirmation</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Your booking was successful!
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -402,3 +424,47 @@
 
 
 @endsection
+<script>
+    $("#bookingForm").on("submit", function(event) {
+        event.preventDefault();
+        var error_ele = document.getElementsByClassName('err-msg');
+        if (error_ele.length > 0){
+            for (var i = error_ele.length-1;i>=0;i--){
+                error_ele[i].remove();
+            }
+        }
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        $.ajax({
+            url: "{{ route('bookings.store') }}",
+            type: "POST",
+            data: new FormData(this),
+            dataType: 'json',
+            contentType: false,
+            processData: false,
+            cache: false,
+            beforeSend: function() {
+                $("#submitBtn").prop('disabled', true);
+            },
+            success: function(data) {
+                if (data.success) {
+                    $("#bookingForm")[0].reset();
+                    $("#showmsg").modal('show');
+                } else {
+                    $.each(data.error, function(key, value) {
+                        var el = $(document).find('[name="'+key+'"]');
+                        el.after($('<span class="err-msg text-danger">' + value[0] + '</span>'));
+                    });
+                }
+                $("#submitBtn").prop('disabled', false);
+            },
+            error: function(err) {
+                $("#message").html("<div class='alert alert-danger'>Some error occurred!</div>");
+                $("#submitBtn").prop('disabled', false);
+            }
+        });
+    });
+</script>

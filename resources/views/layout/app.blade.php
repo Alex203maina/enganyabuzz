@@ -293,11 +293,10 @@
         <!-- Sidebar -->
         <aside class="aside-left  w-64 bg-green shadow-lg p-6 border-r border-border">
             <div class=" profile-head flex items-center space-x-4 mb-8" >
-                <img src="/images/img-DOagCjd9WK6ZtiEjGEVyZ.jpg" alt="User Avatar" class="rounded-full" style="width: 50px;"/>
+                <img src="../assets/img/logo_1.png" alt="User Avatar" class="rounded-full" style="width: 50px;"/>
                 <span class="text-lg font-semibold">Hello, Admin</span>
             </div>
             <!-- Navigation Links -->
-<!-- Navigation Links -->
 <section id="navigation">
     <nav>
         <ul class="space-y-2">
